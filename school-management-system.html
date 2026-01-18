@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <base target="_self">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Manajemen Sekolah</title>
+    <meta name="description" content="Sistem manajemen sekolah dengan fitur absensi, ujian, nilai, rapor, dan RPP">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#2563eb",
+                        secondary: "#1e40af",
+                        accent: "#f59e0b",
+                        success: "#10b981",
+                        warning: "#f59e0b",
+                        danger: "#ef4444"
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', '-apple-system', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .login-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .dashboard-card {
+            border-left: 4px solid;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50">
+    <!-- Login Page -->
+    <div id="loginPage" class="min-h-screen flex items-center justify-center login-container">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-graduation-cap text-white text-2xl"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800">Sistem Manajemen Sekolah</h1>
+                <p class="text-gray-600 mt-2">Masuk ke dashboard admin</p>
+            </div>
+            
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-user mr-2"></i>Username
+                    </label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username"
+                        required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                        placeholder="Masukkan username"
+                    >
+                </div>
+                
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-lock mr-2"></i>Password
+                    </label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password"
+                        required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                        placeholder="Masukkan password"
+                    >
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input 
+                            type="checkbox" 
+                            id="remember"
+                            class="h-4 w-4 text-primary rounded focus:ring-primary"
+                        >
+                        <label for="remember" class="ml-2 text-sm text-gray-600">Ingat saya</label>
+                    </div>
+                    <a href="#" class="text-sm text-primary hover:text-secondary">Lupa password?</a>
+                </div>
+                
+                <button 
+                    type="submit"
+                    id="loginBtn"
+                    class="w-full bg-primary hover:bg-secondary text-white font-semibold py-3 px-4 rounded-lg transition duration-300 transform hover:-translate-y-1"
+                >
+                    <i class="fas fa-sign-in-alt mr-2"></i>Masuk
+                </button>
+                
+                <div class="text-center text-sm text-gray-500">
+                    <p>Default login: admin / password123</p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard Page (Hidden by default) -->
+    <div id="dashboardPage" class="hidden min-h-screen">
+        <!-- Sidebar -->
+        <div class="sidebar fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg">
+            <div class="h-16 flex items-center justify-center border-b">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                        <i class="fas fa-graduation-cap text-white"></i>
+                    </div>
+                    <span class="font-bold text-xl text-gray-800">SekolahKu</span>
+                </div>
+            </div>
+            
+            <div class="p-4">
+                <div class="mb-8">
+                    <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-800" id="loggedInUser">Admin</p>
+                            <p class="text-sm text-gray-500">Administrator</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <nav class="space-y-1">
+                    <a href="#" data-page="dashboard" class="nav-item active">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#" data-page="attendance" class="nav-item">
+                        <i class="fas fa-clipboard-check"></i>
+                        <span>Absensi Siswa</span>
+                    </a>
+                    <a href="#" data-page="exam" class="nav-item">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Generator Soal</span>
+                    </a>
+                    <a href="#" data-page="grades" class="nav-item">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Input Nilai</span>
+                    </a>
+                    <a href="#" data-page="report" class="nav-item">
+                        <i class="fas fa-scroll"></i>
+                        <span>Scan Rapot</span>
+                    </a>
+                    <a href="#" data-page="lesson" class="nav-item">
+                        <i class="fas fa-book"></i>
+                        <span>RPP Pembelajaran</span>
+                    </a>
+                    <div class="pt-4 mt-4 border-t">
+                        <a href="#" id="logoutBtn" class="nav-item text-danger">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Keluar</span>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="ml-64">
+            <!-- Header -->
+            <header class="h-16 bg-white shadow-sm border-b flex items-center justify-between px-6">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-800" id="pageTitle">Dashboard</h2>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <button class="p-2 text-gray-600 hover:text-primary">
+                            <i class="fas fa-bell text-xl"></i>
+                            <span class="absolute top-1 right-1 w-2 h-2 bg-danger rounded-full"></span>
+                        </button>
+                    </div>
+                    <div class="relative">
+                        <button class="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg">
+                            <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-white"></i>
+                            </div>
+                            <span class="font-medium text-gray-700">Admin</span>
+                            <i class="fas fa-chevron-down text-gray-500"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="p-6">
+                <!-- Dashboard Page -->
+                <div id="dashboardContent" class="page-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="dashboard-card bg-white p-6 rounded-xl shadow-sm border-l-4 border-primary">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-500">Total Siswa</p>
+                                    <p class="text-2xl font-bold text-gray-800">1,245</p>
+                                </div>
+                                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-users text-primary text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="dashboard-card bg-white p-6 rounded-xl shadow-sm border-l-4 border-success">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-500">Kehadiran Hari Ini</p>
+                                    <p class="text-2xl font-bold text-gray-800">92%</p>
+                                </div>
+                                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-clipboard-check text-success text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="dashboard-card bg-white p-6 rounded-xl shadow-sm border-l-4 border-warning">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-500">Nilai Rata-rata</p>
+                                    <p class="text-2xl font-bold text-gray-800">85.6</p>
+                                </div>
+                                <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-chart-line text-warning text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="dashboard-card bg-white p-6 rounded-xl shadow-sm border-l-4 border-danger">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-500">RPP Tersedia</p>
+                                    <p class="text-2xl font-bold text-gray-800">156</p>
+                                </div>
+                                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-book text-danger text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-xl shadow-sm p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Menu Utama</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <a href="#" data-page="attendance" class="card-hover bg-gray-50 hover:bg-blue-50 p-4 rounded-lg border border-gray-200">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-clipboard-check text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-800">Absensi Siswa</p>
+                                            <p class="text-sm text-gray-500">Import Excel</p>
+                                        </div>
+                                    </div>
+                                </a>
+                                
+                                <a href="#" data-page="exam" class="card-hover bg-gray-50 hover:bg-green-50 p-4 rounded-lg border border-gray-200">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-file-alt text-success"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-800">Generator Soal</p>
+                                            <p class="text-sm text-gray-500">PG, Essay, Campuran</p>
+                                        </div>
+                                    </div>
+                                </a>
+                                
+                                <a href="#" data-page="grades" class="card-hover bg-gray-50 hover:bg-yellow-50 p-4 rounded-lg border border-gray-200">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-chart-line text-warning"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-800">Input Nilai</p>
+                                            <p class="text-sm text-gray-500">Export Excel/PDF</p>
+                                        </div>
+                                    </div>
+                                </a>
+                                
+                                <a href="#" data-page="report" class="card-hover bg-gray-50 hover:bg-purple-50 p-4 rounded-lg border border-gray-200">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-scroll text-purple-600"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-800">Scan Rapot</p>
+                                            <p class="text-sm text-gray-500">Format Otomatis</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow-sm p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Aktivitas Terbaru</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-file-excel text-primary text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-800">Absensi diexport</p>
+                                            <p class="text-sm text-gray-500">5 menit yang lalu</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-file-alt text-success text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-800">Soal ujian dibuat</p>
+                                            <p class="text-sm text-gray-500">1 jam yang lalu</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-chart-bar text-warning text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-800">Nilai diinput</p>
+                                            <p class="text-sm text-gray-500">2 jam yang lalu</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attendance Page -->
+                <div id="attendanceContent" class="page-content hidden">
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-semibold text-gray-800">Absensi Siswa</h3>
+                            <div class="flex space-x-3">
+                                <button class="btn-import-excel px-4 py-2 bg-success hover:bg-green-700 text-white rounded-lg font-medium">
+                                    <i class="fas fa-file-excel mr-2"></i>Import Excel
+                                </button>
+                                <button class="btn-export-excel px-4 py-2 bg-primary hover:bg-secondary text-white rounded-lg font-medium">
+                                    <i class="fas fa-download mr-2"></i>Export Excel
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
+                                    <select class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                        <option>Semua Kelas</option>
+                                        <option>X IPA 1</option>
+                                        <option>X IPA 2</option>
+                                        <option>XI IPA 1</option>
+                                        <option>XII IPA 1</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Mulai</label>
+                                    <input type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Akhir</label>
+                                    <input type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                            </div>
+                            
+                            <div class="flex space-x-2">
+                                <button class="px-4 py-2 bg-primary text-white rounded-lg">Filter</button>
+                                <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg">Reset</button>
+                            </div>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIS</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Siswa</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kelas</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hadir</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Izin</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Alpha</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200" id="attendanceTable">
+                                    <!-- Data akan diisi oleh JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                            <h4 class="font-medium text-blue-800 mb-2">Petunjuk Import Excel:</h4>
+                            <ul class="text-sm text-blue-700 space-y-1">
+                                <li>1. Format file harus .xlsx atau .csv</li>
+                                <li>2. Kolom wajib: NIS, Nama, Kelas, Tanggal, Status (H/I/A)</li>
+                                <li>3. Status: H = Hadir, I = Izin, A = Alpha</li>
+                                <li>4. Maksimal 1000 baris per import</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exam Generator Page -->
+                <div id="examContent" class="page-content hidden">
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">Generator Soal Ujian</h3>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div class="lg:col-span-2">
+                                <div class="space-y-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Soal</label>
+                                        <div class="grid grid-cols-3 gap-3">
+                                            <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-blue-50">
+                                                <input type="radio" name="questionType" value="multiple" class="h-4 w-4 text-primary" checked>
+                                                <span class="ml-3">
+                                                    <span class="block font-medium text-gray-800">Pilihan Ganda</span>
+                                                    <span class="block text-sm text-gray-500">Multiple Choice</span>
+                                                </span>
+                                            </label>
+                                            <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-green-50">
+                                                <input type="radio" name="questionType" value="essay" class="h-4 w-4 text-primary">
+                                                <span class="ml-3">
+                                                    <span class="block font-medium text-gray-800">Essay</span>
+                                                    <span class="block text-sm text-gray-500">Uraian</span>
+                                                </span>
+                                            </label>
+                                            <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-yellow-50">
+                                                <input type="radio" name="questionType" value="mixed" class="h-4 w-4 text-primary">
+                                                <span class="ml-3">
+                                                    <span class="block font-medium text-gray-800">Campuran</span>
+                                                    <span class="block text-sm text-gray-500">PG + Essay</span>
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Mata Pelajaran</label>
+                                        <select class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                            <option>Matematika</option>
+                                            <option>Bahasa Indonesia</option>
+                                            <option>Bahasa Inggris</option>
+                                            <option>IPA</option>
+                                            <option>IPS</option>
+                                            <option>PKN</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah Soal</label>
+                                        <input type="number" min="1" max="100" value="20" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="flex items-center space-x-2 mb-4">
+                                            <input type="checkbox" id="includeImages" class="h-4 w-4 text-primary rounded">
+                                            <span class="text-sm font-medium text-gray-700">Sertakan Gambar pada Soal</span>
+                                        </label>
+                                        <div id="imageOptions" class="hidden p-4 bg-gray-50 rounded-lg">
+                                            <p class="text-sm text-gray-600 mb-2">Upload gambar untuk soal:</p>
+                                            <input type="file" accept="image/*" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Kunci Jawaban</label>
+                                        <textarea 
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg h-32"
+                                            placeholder="Masukkan kunci jawaban (format: 1.A, 2.B, 3.C, dst.)"
+                                        ></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="bg-gray-50 p-6 rounded-lg">
+                                    <h4 class="font-medium text-gray-800 mb-4">Preview Soal</h4>
+                                    <div class="space-y-4">
+                                        <div class="p-4 bg-white rounded-lg border">
+                                            <p class="font-medium text-gray-800 mb-2">Soal 1:</p>
+                                            <p class="text-gray-600">Berapakah hasil dari 2 + 2?</p>
+                                            <div class="mt-3 space-y-2">
+                                                <div class="flex items-center">
+                                                    <input type="radio" name="q1" class="mr-2">
+                                                    <span>A. 3</span>
+                                                </div>
+                                                <div class="flex items-center">
+                                                    <input type="radio" name="q1" class="mr-2">
+                                                    <span>B. 4</span>
+                                                </div>
+                                                <div class="flex items-center">
+                                                    <input type="radio" name="q1" class="mr-2">
+                                                    <span>C. 5</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="p-4 bg-white rounded-lg border">
+                                            <p class="font-medium text-gray-800 mb-2">Kunci Jawaban:</p>
+                                            <p class="text-success font-medium">1.B, 2.A, 3.C, 4.D, 5.B</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-6 space-y-3">
+                                        <button class="w-full px-4 py-3 bg-primary hover:bg-secondary text-white rounded-lg font-medium">
+                                            <i class="fas fa-file-word mr-2"></i>Export ke Word
+                                        </button>
+                                        <button class="w-full px-4 py-3 bg-danger hover:bg-red-700 text-white rounded-lg font-medium">
+                                            <i class="fas fa-file-pdf mr-2"></i>Export ke PDF
+                                        </button>
+                                        <button class="w-full px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium">
+                                            <i class="fas fa-save mr-2"></i>Simpan Template
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grades Input Page -->
+                <div id="gradesContent" class="page-content hidden">
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-semibold text-gray-800">Input Nilai Siswa</h3>
+                            <div class="flex space-x-3">
+                                <button class="btn-import-grades px-4 py-2 bg-primary hover:bg-secondary text-white rounded-lg font-medium">
+                                    <i class="fas fa-upload mr-2"></i>Import Data
+                                </button>
+                                <div class="relative">
+                                    <button class="btn-export-dropdown px-4 py-2 bg-success hover:bg-green-700 text-white rounded-lg font-medium">
+                                        <i class="fas fa-download mr-2"></i>Export
+                                        <i class="fas fa-chevron-down ml-2"></i>
+                                    </button>
+                                    <div class="export-menu absolute hidden mt-1 w-48 bg-white rounded-lg shadow-lg border">
+                                        <a href="#" class="export-excel block px-4 py-3 hover:bg-gray-50">Export Excel</a>
+                                        <a href="#" class="export-pdf block px-4 py-3 hover:bg-gray-50">Export PDF</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
+                                    <select class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                        <option>X IPA 1</option>
+                                        <option>X IPA 2</option>
+                                        <option>XI IPA 1</option>
+                                        <option>XII IPA 1</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Mata Pelajaran</label>
+                                    <select class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                        <option>Matematika</option>
+                                        <option>Bahasa Indonesia</option>
+                                        <option>Bahasa Inggris</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Semester</label>
+                                    <select class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                        <option>Ganjil</option>
+                                        <option>Genap</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tahun Ajaran</label>
+                                    <input type="text" value="2023/2024" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIS</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Siswa</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nilai Tugas</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nilai Harian</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nilai Semester</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nilai Praktek</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rata-rata</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200" id="gradesTable">
+                                    <!-- Data akan diisi oleh JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="p-4 bg-blue-50 rounded-lg">
+                                <h4 class="font-medium text-blue-800 mb-2">Rata-rata Kelas</h4>
+                                <p class="text-2xl font-bold text-blue-700">85.6</p>
+                            </div>
+                            <div class="p-4 bg-green-50 rounded-lg">
+                                <h4 class="font-medium text-green-800 mb-2">Nilai Tertinggi</h4>
+                                <p class="text-2xl font-bold text-green-700">98.5</p>
+                            </div>
+                            <div class="p-4 bg-yellow-50 rounded-lg">
+                                <h4 class="font-medium text-yellow-800 mb-2">Nilai Terendah</h4>
+                                <p class="text-2xl font-bold text-yellow-700">65.0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Report Scan Page -->
+                <div id="reportContent" class="page-content hidden">
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">Scan Kertas Rapot</h3>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div>
+                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary transition">
+                                    <i class="fas fa-file-upload text-4xl text-gray-400 mb-4"></i>
+                                    <p class="text-lg font-medium text-gray-700 mb-2">Upload Scan Rapot</p>
+                                    <p class="text-sm text-gray-500 mb-4">Format: JPG, PNG, PDF (maks. 10MB)</p>
+                                    <input type="file" accept=".jpg,.jpeg,.png,.pdf" class="hidden" id="reportUpload">
+                                    <label for="reportUpload" class="inline-block px-6 py-3 bg-primary hover:bg-secondary text-white rounded-lg font-medium cursor-pointer">
+                                        <i class="fas fa-camera mr-2"></i>Pilih File
+                                    </label>
+                                </div>
+                                
+                                <div class="mt-6 space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Format Sekolah</label>
+                                        <select class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                            <option>Format Nasional (K13)</option>
+                                            <option>Format Sekolah Dasar</option>
+                                            <option>Format Sekolah Menengah</option>
+                                            <option>Format Pesantren</option>
+                                            <option>Format Internasional</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Deteksi Otomatis</label>
+                                        <div class="flex items-center space-x-3">
+                                            <label class="flex items-center">
+                                                <input type="checkbox" class="h-4 w-4 text-primary rounded" checked>
+                                                <span class="ml-2 text-sm text-gray-700">Nama Siswa</span>
+                                            </label>
+                                            <label class="flex items-center">
+                                                <input type="checkbox" class="h-4 w-4 text-primary rounded" checked>
+                                                <span class="ml-2 text-sm text-gray-700">Nilai</span>
+                                            </label>
+                                            <label class="flex items-center">
+                                                <input type="checkbox" class="h-4 w-4 text-primary rounded">
+                                                <span class="ml-2 text-sm text-gray-700">Catatan</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="bg-gray-50 p-6 rounded-lg h-full">
+                                    <h4 class="font-medium text-gray-800 mb-4">Preview Hasil Scan</h4>
+                                    <div class="bg-white p-4 rounded-lg border mb-4">
+                                        <div class="text-center mb-4">
+                                            <h5 class="font-bold text-lg">RAPOR SISWA</h5>
+                                            <p class="text-sm">SEMESTER GANJIL TAHUN 2023/2024</p>
+                                        </div>
+                                        
+                                        <div class="space-y-3">
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <span class="text-sm font-medium">Nama:</span>
+                                                <span class="text-sm">[Terdeteksi Otomatis]</span>
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <span class="text-sm font-medium">NIS:</span>
+                                                <span class="text-sm">[Terdeteksi Otomatis]</span>
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <span class="text-sm font-medium">Kelas:</span>
+                                                <span class="text-sm">[Terdeteksi Otomatis]</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mt-4">
+                                            <table class="w-full text-sm">
+                                                <thead class="bg-gray-100">
+                                                    <tr>
+                                                        <th class="px-3 py-2 text-left">Mata Pelajaran</th>
+                                                        <th class="px-3 py-2 text-left">Nilai</th>
+                                                        <th class="px-3 py-2 text-left">Predikat</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr class="border-b">
+                                                        <td class="px-3 py-2">Matematika</td>
+                                                        <td class="px-3 py-2">[85]</td>
+                                                        <td class="px-3 py-2">[A]</td>
+                                                    </tr>
+                                                    <tr class="border-b">
+                                                        <td class="px-3 py-2">Bahasa Indonesia</td>
+                                                        <td class="px-3 py-2">[88]</td>
+                                                        <td class="px-3 py-2">[A]</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="space-y-3">
+                                        <button class="w-full px-4 py-3 bg-primary hover:bg-secondary text-white rounded-lg font-medium">
+                                            <i class="fas fa-check-circle mr-2"></i>Konfirmasi & Simpan
+                                        </button>
+                                        <button class="w-full px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium">
+                                            <i class="fas fa-redo mr-2"></i>Scan Ulang
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lesson Plan Page -->
+                <div id="lessonContent" class="page-content hidden">
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-semibold text-gray-800">RPP Pembelajaran</h3>
+                            <div class="flex space-x-3">
+                                <button class="btn-update-curriculum px-4 py-2 bg-primary hover:bg-secondary text-white rounded-lg font-medium">
+                                    <i class="fas fa-sync-alt mr-2"></i>Update Kurikulum
+                                </button>
+                                <div class="relative">
+                                    <button class="btn-export-rpp px-4 py-2 bg-success hover:bg-green-700 text-white rounded-lg font-medium">
+                                        <i class="fas fa-download mr-2"></i>Export RPP
+                                        <i class="fas fa-chevron-down ml-2"></i>
+                                    </button>
+                                    <div class="export-rpp-menu absolute hidden mt-1 w-48 bg-white rounded-lg shadow-lg border">
+                                        <a href="#" class="export-word block px-4 py-3 hover:bg-gray-50">Export ke Word</a>
+                                        <a href="#" class="export-pdf-rpp block px-4 py-3 hover:bg-gray-50">Export ke PDF</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Jenjang</label>
+                                    <select class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                        <option>SD/MI</option>
+                                        <option>SMP/MTs</option>
+                                        <option>SMA/MA</option>
+                                        <option>SMK</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Kurikulum</label>
+                                    <select class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                        <option>Kurikulum Merdeka</option>
+                                        <option>Kurikulum 2013</option>
+                                        <option>Kurikulum KTSP</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Mata Pelajaran</label>
+                                    <select class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                        <option>Matematika</option>
+                                        <option>Bahasa Indonesia</option>
+                                        <option>IPA</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
+                                    <select class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                        <option>X</option>
+                                        <option>XI</option>
+                                        <option>XII</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Kompetensi Inti</label>
+                                <textarea class="w-full px-4 py-2 border border-gray-300 rounded-lg h-24" readonly>
+[Otomatis terisi berdasarkan kurikulum terbaru]
+1. Menghargai dan menghayati ajaran agama yang dianutnya
+2. Menghargai dan menghayati perilaku jujur, disiplin, tanggungjawab
+3. Memahami pengetahuan faktual, konseptual, prosedural
+4. Mengolah, menyaji, dan menalar dalam ranah konkret
+                                </textarea>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Kompetensi Dasar</label>
+                                <textarea class="w-full px-4 py-2 border border-gray-300 rounded-lg h-24" readonly>
+[Otomatis terisi berdasarkan kurikulum terbaru]
+3.1 Menganalisis data dan informasi
+3.2 Menyelesaikan masalah kontekstual
+4.1 Menyajikan hasil analisis data
+4.2 Membuat laporan investigasi
+                                </textarea>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Tujuan Pembelajaran</label>
+                                <textarea class="w-full px-4 py-2 border border-gray-300 rounded-lg h-32" placeholder="Masukkan tujuan pembelajaran"></textarea>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Materi Pembelajaran</label>
+                                <textarea class="w-full px-4 py-2 border border-gray-300 rounded-lg h-32" placeholder="Masukkan materi pembelajaran"></textarea>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Metode Pembelajaran</label>
+                                    <div class="space-y-2">
+                                        <label class="flex items-center">
+                                            <input type="checkbox" class="h-4 w-4 text-primary rounded">
+                                            <span class="ml-2 text-sm text-gray-700">Diskusi</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" class="h-4 w-4 text-primary rounded" checked>
+                                            <span class="ml-2 text-sm text-gray-700">Presentasi</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" class="h-4 w-4 text-primary rounded">
+                                            <span class="ml-2 text-sm text-gray-700">Praktikum</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" class="h-4 w-4 text-primary rounded">
+                                            <span class="ml-2 text-sm text-gray-700">Proyek</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Penilaian</label>
+                                    <div class="space-y-2">
+                                        <label class="flex items-center">
+                                            <input type="checkbox" class="h-4 w-4 text-primary rounded" checked>
+                                            <span class="ml-2 text-sm text-gray-700">Tes Tertulis</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" class="h-4 w-4 text-primary rounded">
+                                            <span class="ml-2 text-sm text-gray-700">Observasi</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" class="h-4 w-4 text-primary rounded">
+                                            <span class="ml-2 text-sm text-gray-700">Portofolio</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" class="h-4 w-4 text-primary rounded" checked>
+                                            <span class="ml-2 text-sm text-gray-700">Penugasan</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-end space-x-3">
+                                <button class="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium">
+                                    <i class="fas fa-times mr-2"></i>Batal
+                                </button>
+                                <button class="px-6 py-3 bg-primary hover:bg-secondary text-white rounded-lg font-medium">
+                                    <i class="fas fa-save mr-2"></i>Simpan RPP
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Data untuk aplikasi
+        const sampleStudents = [
+            { "nis": "2023001", "name": "Ahmad Fauzi", "class": "X IPA 1", "present": 18, "permission": 1, "absent": 1 },
+            { "nis": "2023002", "name": "Budi Santoso", "class": "X IPA 1", "present": 19, "permission": 1, "absent": 0 },
+            { "nis": "2023003", "name": "Citra Dewi", "class": "X IPA 1", "present": 17, "permission": 2, "absent": 1 },
+            { "nis": "2023004", "name": "Dian Pratama", "class": "X IPA 1", "present": 20, "permission": 0, "absent": 0 },
+            { "nis": "2023005", "name": "Eka Putri", "class": "X IPA 1", "present": 18, "permission": 1, "absent": 1 }
+        ];
+
+        const sampleGrades = [
+            { "nis": "2023001", "name": "Ahmad Fauzi", "task": 85, "daily": 88, "semester": 90, "practice": 87 },
+            { "nis": "2023002", "name": "Budi Santoso", "task": 90, "daily": 92, "semester": 95, "practice": 88 },
+            { "nis": "2023003", "name": "Citra Dewi", "task": 88, "daily": 85, "semester": 87, "practice": 90 },
+            { "nis": "2023004", "name": "Dian Pratama", "task": 92, "daily": 94, "semester": 96, "practice": 93 },
+            { "nis": "2023005", "name": "Eka Putri", "task": 80, "daily": 82, "semester": 85, "practice": 81 }
+        ];
+
+        // Fungsi untuk menghitung rata-rata nilai
+        function calculateAverage(grades) {
+            return ((grades.task + grades.daily + grades.semester + grades.practice) / 4).toFixed(1);
+        }
+
+        // Fungsi untuk mengisi tabel absensi
+        function populateAttendanceTable() {
+            const tableBody = document.getElementById("attendanceTable");
+            tableBody.innerHTML = "";
+            
+            sampleStudents.forEach(student => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${student.nis}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${student.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${student.class}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full">${student.present}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">${student.permission}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full">${student.absent}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <button class="text-primary hover:text-secondary mr-3">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="text-danger hover:text-red-700">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Fungsi untuk mengisi tabel nilai
+        function populateGradesTable() {
+            const tableBody = document.getElementById("gradesTable");
+            tableBody.innerHTML = "";
+            
+            sampleGrades.forEach(grade => {
+                const average = calculateAverage(grade);
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${grade.nis}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${grade.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <input type="number" value="${grade.task}" class="w-20 px-2 py-1 border rounded">
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <input type="number" value="${grade.daily}" class="w-20 px-2 py-1 border rounded">
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <input type="number" value="${grade.semester}" class="w-20 px-2 py-1 border rounded">
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <input type="number" value="${grade.practice}" class="w-20 px-2 py-1 border rounded">
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded">${average}</span>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Fungsi untuk beralih halaman
+        function switchPage(pageName) {
+            // Sembunyikan semua konten halaman
+            document.querySelectorAll(".page-content").forEach(el => {
+                el.classList.add("hidden");
+            });
+            
+            // Tampilkan halaman yang dipilih
+            document.getElementById(`${pageName}Content`).classList.remove("hidden");
+            
+            // Update judul halaman
+            const pageTitles = {
+                "dashboard": "Dashboard",
+                "attendance": "Absensi Siswa",
+                "exam": "Generator Soal",
+                "grades": "Input Nilai",
+                "report": "Scan Rapot",
+                "lesson": "RPP Pembelajaran"
+            };
+            document.getElementById("pageTitle").textContent = pageTitles[pageName];
+            
+            // Update menu aktif
+            document.querySelectorAll(".nav-item").forEach(el => {
+                el.classList.remove("active");
+            });
+            document.querySelector(`.nav-item[data-page="${pageName}"]`).classList.add("active");
+            
+            // Jika halaman absensi atau nilai, isi tabel
+            if (pageName === "attendance") {
+                populateAttendanceTable();
+            } else if (pageName === "grades") {
+                populateGradesTable();
+            }
+        }
+
+        // Fungsi login
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            
+            // Validasi sederhana
+            if ((username === "admin" && password === "password123") || 
+                (username === "guru" && password === "guru123")) {
+                
+                // Tampilkan dashboard
+                document.getElementById("loginPage").classList.add("hidden");
+                document.getElementById("dashboardPage").classList.remove("hidden");
+                
+                // Update nama user
+                document.getElementById("loggedInUser").textContent = 
+                    username === "admin" ? "Administrator" : "Guru";
+                
+                // Isi data awal
+                populateAttendanceTable();
+                populateGradesTable();
+                
+                // Tampilkan notifikasi sukses
+                showNotification("Login berhasil!", "success");
+            } else {
+                showNotification("Username atau password salah!", "error");
+            }
+        }
+
+        // Fungsi logout
+        function handleLogout() {
+            document.getElementById("dashboardPage").classList.add("hidden");
+            document.getElementById("loginPage").classList.remove("hidden");
+            
+            // Reset form login
+            document.getElementById("loginForm").reset();
+            
+            showNotification("Anda telah logout", "info");
+        }
+
+        // Fungsi untuk menampilkan notifikasi
+        function showNotification(message, type = "info") {
+            // Buat elemen notifikasi
+            const notification = document.createElement("div");
+            notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg text-white font-medium transform transition-transform duration-300 ${
+                type === "success" ? "bg-success" :
+                type === "error" ? "bg-danger" :
+                type === "warning" ? "bg-warning" : "bg-primary"
+            }`;
+            notification.textContent = message;
+            
+            // Tambahkan ke body
+            document.body.appendChild(notification);
+            
+            // Hapus setelah 3 detik
+            setTimeout(() => {
+                notification.style.transform = "translateX(100%)";
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Fungsi untuk export data
+        function handleExport(type, format) {
+            showNotification(`Mengexport data ${type} ke ${format}...`, "success");
+            
+            // Simulasi download
+            setTimeout(() => {
+                showNotification(`Export ${type} ke ${format} berhasil!`, "success");
+            }, 1500);
+        }
+
+        // Event Listeners saat DOM siap
+        document.addEventListener("DOMContentLoaded", function() {
+            // Login form
+            document.getElementById("loginForm").addEventListener("submit", handleLogin);
+            
+            // Logout button
+            document.getElementById("logoutBtn").addEventListener("click", handleLogout);
+            
+            // Navigation menu
+            document.querySelectorAll(".nav-item").forEach(item => {
+                item.addEventListener("click", function(e) {
+                    e.preventDefault();
+                    const page = this.getAttribute("data-page");
+                    switchPage(page);
+                });
+            });
+            
+            // Dashboard menu cards
+            document.querySelectorAll("[data-page]").forEach(card => {
+                card.addEventListener("click", function(e) {
+                    if (this.tagName === "A") {
+                        e.preventDefault();
+                        const page = this.getAttribute("data-page");
+                        switchPage(page);
+                    }
+                });
+            });
+            
+            // Include images checkbox
+            document.getElementById("includeImages").addEventListener("change", function() {
+                document.getElementById("imageOptions").classList.toggle("hidden", !this.checked);
+            });
+            
+            // Export dropdowns
+            document.querySelector(".btn-export-dropdown").addEventListener("click", function() {
+                document.querySelector(".export-menu").classList.toggle("hidden");
+            });
+            
+            document.querySelector(".btn-export-rpp").addEventListener("click", function() {
+                document.querySelector(".export-rpp-menu").classList.toggle("hidden");
+            });
+            
+            // Export buttons
+            document.querySelectorAll(".export-excel").forEach(btn => {
+                btn.addEventListener("click", function(e) {
+                    e.preventDefault();
+                    handleExport("absensi", "Excel");
+                });
+            });
+            
+            document.querySelectorAll(".export-pdf").forEach(btn => {
+                btn.addEventListener("click", function(e) {
+                    e.preventDefault();
+                    handleExport("nilai", "PDF");
+                });
+            });
+            
+            document.querySelectorAll(".export-word").forEach(btn => {
+                btn.addEventListener("click", function(e) {
+                    e.preventDefault();
+                    handleExport("RPP", "Word");
+                });
+            });
+            
+            document.querySelectorAll(".export-pdf-rpp").forEach(btn => {
+                btn.addEventListener("click", function(e) {
+                    e.preventDefault();
+                    handleExport("RPP", "PDF");
+                });
+            });
+            
+            // Import buttons
+            document.querySelector(".btn-import-excel").addEventListener("click", function() {
+                showNotification("Mengimport data absensi dari Excel...", "info");
+            });
+            
+            document.querySelector(".btn-import-grades").addEventListener("click", function() {
+                showNotification("Mengimport data nilai...", "info");
+            });
+            
+            // Update curriculum button
+            document.querySelector(".btn-update-curriculum").addEventListener("click", function() {
+                showNotification("Memperbarui data kurikulum terbaru...", "info");
+            });
+            
+            // Tutup dropdown saat klik di luar
+            document.addEventListener("click", function(e) {
+                if (!e.target.closest(".relative")) {
+                    document.querySelectorAll(".export-menu, .export-rpp-menu").forEach(menu => {
+                        menu.classList.add("hidden");
+                    });
+                }
+            });
+            
+            // Default login info
+            document.getElementById("username").value = "admin";
+            document.getElementById("password").value = "password123";
+        });
+
+        // Style untuk nav item aktif
+        const style = document.createElement("style");
+        style.textContent = `
+            .nav-item {
+                display: flex;
+                align-items: center;
+                padding: 0.75rem 1rem;
+                color: #6b7280;
+                border-radius: 0.5rem;
+                transition: all 0.2s;
+            }
+            
+            .nav-item:hover {
+                background-color: #f3f4f6;
+                color: #374151;
+            }
+            
+            .nav-item.active {
+                background-color: #dbeafe;
+                color: #1d4ed8;
+            }
+            
+            .nav-item i {
+                width: 1.5rem;
+                margin-right: 0.75rem;
+            }
+            
+            .btn-import-excel, .btn-export-excel, .btn-import-grades, 
+            .btn-export-dropdown, .btn-update-curriculum, .btn-export-rpp {
+                transition: all 0.2s;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
